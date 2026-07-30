@@ -1,18 +1,41 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import React from 'react';
+import { configureNotificationHandler } from '../lib/notifications';
+import { AppStateProvider } from '../lib/state/AppState';
+import { useAppTheme } from '../theme/useTheme';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+configureNotificationHandler();
 
-SplashScreen.preventAutoHideAsync();
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <AppStateProvider>
+      <RootStack />
+    </AppStateProvider>
+  );
+}
+
+function RootStack() {
+  const theme = useAppTheme();
+  return (
+    <>
+      <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: theme.page },
+          headerTintColor: theme.textPrimary,
+          headerShadowVisible: false,
+          contentStyle: { backgroundColor: theme.page },
+        }}
+      >
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="settings" options={{ title: 'Settings', presentation: 'modal' }} />
+        <Stack.Screen name="course-builder" options={{ title: 'Add a course', presentation: 'modal' }} />
+        <Stack.Screen name="run/[id]" options={{ title: 'Run detail' }} />
+        <Stack.Screen name="metric/[key]" options={{ title: 'Metric' }} />
+      </Stack>
+    </>
   );
 }
